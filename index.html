@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>鉄道鬼ごっこ</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f2f2f2;
+}
+
+/* 上部バー */
+#topBar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #222;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  z-index: 1000;
+}
+
+/* ミッション */
+#missionBox {
+  position: fixed;
+  top: 60px;
+  width: 100%;
+  background: #fff3cd;
+  padding: 8px;
+  text-align: center;
+  z-index: 900;
+}
+
+/* マップ（上下固定で可変） */
+#map {
+  position: fixed;
+  top: 110px;
+  bottom: 110px;
+  width: 100%;
+}
+
+/* 下部パネル */
+#bottomPanel {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: white;
+  padding: 8px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+/* ボタン */
+button {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  border: none;
+}
+
+button:not(:disabled) {
+  background: #1976d2;
+  color: white;
+}
+
+button:disabled {
+  background: #ccc;
+  opacity: 0.5;
+}
+
+/* セレクト */
+select, input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+/* 管理者パネル */
+#adminPanel {
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="login">
+  <h1>鉄道鬼ごっこ ログイン</h1>
+  <input id="name" placeholder="名前を入力">
+  <br><br>
+  <select id="role">
+    <option value="">役職を選択</option>
+    <option value="runner">逃走者</option>
+    <option value="hunter">鬼</option>
+    <option value="admin">管理者</option>
+  </select>
+  <br><br>
+  <button id="loginBtn">ログイン</button>
+</div>
+
+<div id="game" style="display:none;">
+
+  <div id="topBar">
+    <div id="timer">次の更新まで --:--</div>
+    <div id="playerStatus"></div>
+  </div>
+
+  <div id="missionBox" style="display:none;">
+    <b>ミッション</b><br>
+    <span id="missionText"></span><br>
+    <small id="missionTimer"></small>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="bottomPanel">
+
+    <button id="manualBtn">地下モード</button>
+
+    <select id="companySelect">
+      <option value="">会社を選択</option>
+    </select>
+
+    <select id="lineSelect" disabled>
+      <option value="">路線を選択</option>
+    </select>
+
+    <select id="stationSelect" disabled>
+      <option value="">駅を選択</option>
+    </select>
+
+    <button id="logoutBtn">ログアウト</button>
+
+    <div id="adminControl" style="display:none;">
+
+      <button onclick="toggleAdminPanel()">⚙ 管理者メニュー</button>
+
+      <div id="adminPanel" style="display:none;">
+
+        <h4>更新間隔設定</h4>
+
+        鬼：
+        <input type="number" id="hunterMinutes" value="5"> 分<br><br>
+
+        逃走者：
+        <input type="number" id="runnerMinutes" value="5"> 分<br><br>
+
+        <button id="setIntervalBtn">設定する</button>
+
+      </div>
+    </div>
+
+    <div id="adminMission" style="display:none;">
+      <input id="missionInput" placeholder="ミッション内容">
+      <input id="missionMinutes" type="number" placeholder="表示分数">
+      <button id="setMissionBtn">ミッション設定</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
