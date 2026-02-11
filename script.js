@@ -206,7 +206,8 @@ const popupContent = () => {
   return `
     <b>${data.name}</b><br>
     役職：${data.role}<br>
-    最後の更新：${min}分${sec}秒前
+    最後の更新：
+<span id="time_${id}">${min}分${sec}秒前</span>
     ${adminControls}
   `;
 };
@@ -222,29 +223,35 @@ const popupContent = () => {
   .bindPopup("")
   .on("popupopen", function () {
 
-    const marker = this;
+  const marker = this;
+  marker.setPopupContent(popupContent());
 
-    // 最初に表示
-    marker.setPopupContent(popupContent());
+  const timeEl = document.getElementById(`time_${id}`);
 
-    // 1秒ごとに更新
-    marker._popupInterval = setInterval(() => {
-      marker.setPopupContent(popupContent());
-    }, 1000);
+  marker._popupInterval = setInterval(() => {
 
-  })
-  .on("popupclose", function () {
+    const diff = Date.now() - updatedAtMs;
+    const min = Math.floor(diff / 60000);
+    const sec = Math.floor((diff % 60000) / 1000);
 
-    // 閉じたら停止
-    if (this._popupInterval) {
-      clearInterval(this._popupInterval);
-      this._popupInterval = null;
+    if (timeEl) {
+      timeEl.innerText = `${min}分${sec}秒前`;
     }
 
-  });
+  }, 1000);
 
-      }
-    });
+})
+.on("popupclose", function () {
+  if (this._popupInterval) {
+    clearInterval(this._popupInterval);
+    this._popupInterval = null;
+  }
+});
+
+    
+
+}
+});
 
     Object.keys(markers).forEach((id) => {
       if (!aliveIds.has(id)) {
