@@ -65,7 +65,6 @@ const stationSelect = document.getElementById("stationSelect");
 const missionBox = document.getElementById("missionBox");
 const missionTextEl = document.getElementById("missionText");
 const missionTimerEl = document.getElementById("missionTimer");
-const adminMissionDiv = document.getElementById("adminMission");
 
 
 /*************************
@@ -137,11 +136,7 @@ function startGame() {
 
   if (gameStarted) return;
   gameStarted = true;
-if (playerRole === "admin") {
-  adminMissionDiv.style.display = "block";
-} else {
-  adminMissionDiv.style.display = "none";
-}
+
 
   map = L.map("map").setView([35.681236, 139.767125], 13);
 
