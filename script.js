@@ -175,10 +175,18 @@ updateButtonUI();
       const pos = [data.lat, data.lng];
       const icon = getIconByRole(data.role);
       const updatedAtMs = data.updatedAt?.toMillis?.();
-const popupContent = () => {
-  if (!updatedAtMs) return "更新時刻不明";
+      // 🔥 最新更新時刻をマーカーに保存
+if (markers[id]) {
+  markers[id]._lastUpdatedAt = updatedAtMs;
+}
 
-  const diff = Date.now() - updatedAtMs;
+const popupContent = () => {
+
+  const lastTime = markers[id]?._lastUpdatedAt || updatedAtMs;
+
+  if (!lastTime) return "更新時刻不明";
+
+  const diff = Date.now() - lastTime;
   const min = Math.floor(diff / 60000);
   const sec = Math.floor((diff % 60000) / 1000);
 
@@ -199,25 +207,30 @@ const popupContent = () => {
         <button onclick="realtimePlayer('${id}')">実行</button>
       </div>
     `;
-
-
   }
 
   return `
     <b>${data.name}</b><br>
     役職：${data.role}<br>
     最後の更新：
-<span id="time_${id}">${min}分${sec}秒前</span>
+    <span id="time_${id}">${min}分${sec}秒前</span>
     ${adminControls}
   `;
 };
 
-
-
       if (markers[id]) {
-        markers[id].setLatLng(pos);
-        markers[id].setIcon(icon);
-      } else {
+
+  markers[id].setLatLng(pos);
+  markers[id].setIcon(icon);
+
+  // 🔥 ポップアップ内容を更新
+  markers[id].setPopupContent(popupContent());
+
+  // 🔥 最新時刻保存
+  markers[id]._lastUpdatedAt = updatedAtMs;
+
+}
+ else {
         markers[id] = L.marker(pos, { icon })
   .addTo(map)
   .bindPopup("")
@@ -230,15 +243,18 @@ const popupContent = () => {
 
   marker._popupInterval = setInterval(() => {
 
-    const diff = Date.now() - updatedAtMs;
-    const min = Math.floor(diff / 60000);
-    const sec = Math.floor((diff % 60000) / 1000);
+  const freshData = markers[id]._lastUpdatedAt;
+  const diff = Date.now() - freshData;
 
-    if (timeEl) {
-      timeEl.innerText = `${min}分${sec}秒前`;
-    }
+  const min = Math.floor(diff / 60000);
+  const sec = Math.floor((diff % 60000) / 1000);
 
-  }, 1000);
+  if (timeEl) {
+    timeEl.innerText = `${min}分${sec}秒前`;
+  }
+
+}, 1000);
+
 
 })
 .on("popupclose", function () {
