@@ -48,7 +48,7 @@ let runnerInterval = 5 * 60 * 1000;
 let freezeUntil = null;
 let realtimeUntil = null;
 let realtimeLoop = null;
-
+let lowAccuracyCount = 0;
 function initUpdateState() {
   if (!localStorage.getItem("lastUpdateAt")) {
     localStorage.setItem("lastUpdateAt", 0);
@@ -281,37 +281,59 @@ function updateByGPS() {
 
   navigator.geolocation.getCurrentPosition(
 
-    (pos) => {
+    async (pos) => {
 
       gpsErrorNotified = false;
 
-      if (pos.coords.accuracy <= 50) {
+      const accuracy = pos.coords.accuracy;
 
-        allowManual = false;
-        manualBtn.disabled = true;
+      // 🔥 精度が悪い（80m以上）
+      if (accuracy > 80) {
 
-        const timerEl = document.getElementById("timer");
-        const statusEl = document.getElementById("playerStatus");
+        lowAccuracyCount++;
 
-        timerEl.innerText = "位置情報を取得しました";
-        statusEl.innerText = "";
+        // 2回連続で悪ければ地下モード
+        if (lowAccuracyCount >= 2) {
 
-        updateButtonUI();
+          await hideMyLocation(); // 🔥 位置を消す
+          enableManual("GPS精度が低いため地下モードに切り替わりました");
+          return;
+        }
 
-        applyUpdate(pos.coords.latitude, pos.coords.longitude);
-
-      } else {
-        enableManual("GPS精度が低いため地下モードに切り替わりました");
+        return;
       }
+
+      // 精度が良い場合
+      lowAccuracyCount = 0;
+
+      allowManual = false;
+      manualBtn.disabled = true;
+
+      const timerEl = document.getElementById("timer");
+      const statusEl = document.getElementById("playerStatus");
+
+      timerEl.innerText = "位置情報を取得しました";
+      statusEl.innerText = "";
+
+      updateButtonUI();
+
+      applyUpdate(pos.coords.latitude, pos.coords.longitude);
     },
 
-    () => {
-      enableManual("GPS取得失敗。地下モードを使用してください");
-    }
+    async () => {
 
+      // 🔥 GPS取得失敗 → 位置削除
+      await hideMyLocation();
+      enableManual("GPS取得失敗。地下モードを使用してください");
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
   );
 }
-
 
 function enableManual(msg) {
   allowManual = true;
@@ -350,7 +372,12 @@ async function applyUpdate(lat, lng) {
   document.getElementById("updateStatus").innerText =
   "この時間内ですでに位置更新しました";
 }
-
+async function hideMyLocation() {
+  await setDoc(doc(db, "locations", playerId), {
+    visible: false,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
 /*************************
  * タイマー
  *************************/
@@ -728,4 +755,5 @@ window.toggleAdminPanel = function() {
   const panel = document.getElementById("adminPanel");
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 };
+
 
