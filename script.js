@@ -277,7 +277,6 @@ const popupContent = () => {
  * GPS更新
  *************************/
 function updateByGPS() {
-  if (!canUpdateNow()) return;
 
   navigator.geolocation.getCurrentPosition(
 
@@ -287,22 +286,21 @@ function updateByGPS() {
 
       const accuracy = pos.coords.accuracy;
 
-      // 🔥 精度が悪い（80m以上）
+      // 精度が悪い
       if (accuracy > 80) {
 
-  lowAccuracyCount++;
+        lowAccuracyCount++;
 
-  // 🔥 1回目でも即非表示
-  await hideMyLocation();
+        await hideMyLocation();
 
-  if (lowAccuracyCount >= 2) {
-    enableManual("GPS精度が低いため地下モードに切り替わりました");
-  }
+        if (lowAccuracyCount >= 2) {
+          enableManual("GPS精度が低いため地下モードに切り替わりました");
+        }
 
-  return;
-}
+        return;
+      }
 
-      // 精度が良い場合
+      // 精度良好
       lowAccuracyCount = 0;
 
       allowManual = false;
@@ -316,12 +314,11 @@ function updateByGPS() {
 
       updateButtonUI();
 
-      applyUpdate(pos.coords.latitude, pos.coords.longitude);
+      await applyUpdate(pos.coords.latitude, pos.coords.longitude);
     },
 
     async () => {
 
-      // 🔥 GPS取得失敗 → 位置削除
       await hideMyLocation();
       enableManual("GPS取得失敗。地下モードを使用してください");
     },
@@ -754,6 +751,7 @@ window.toggleAdminPanel = function() {
   const panel = document.getElementById("adminPanel");
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 };
+
 
 
 
