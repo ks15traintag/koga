@@ -285,7 +285,7 @@ function updateByGPS() {
 
       gpsErrorNotified = false;
 
-      if (pos.coords.accuracy <= 100) {
+      if (pos.coords.accuracy <= 50) {
 
         allowManual = false;
         manualBtn.disabled = true;
@@ -728,3 +728,4 @@ window.toggleAdminPanel = function() {
   const panel = document.getElementById("adminPanel");
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 };
+
