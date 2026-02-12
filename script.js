@@ -290,18 +290,17 @@ function updateByGPS() {
       // 🔥 精度が悪い（80m以上）
       if (accuracy > 80) {
 
-        lowAccuracyCount++;
+  lowAccuracyCount++;
 
-        // 2回連続で悪ければ地下モード
-        if (lowAccuracyCount >= 2) {
+  // 🔥 1回目でも即非表示
+  await hideMyLocation();
 
-          await hideMyLocation(); // 🔥 位置を消す
-          enableManual("GPS精度が低いため地下モードに切り替わりました");
-          return;
-        }
+  if (lowAccuracyCount >= 2) {
+    enableManual("GPS精度が低いため地下モードに切り替わりました");
+  }
 
-        return;
-      }
+  return;
+}
 
       // 精度が良い場合
       lowAccuracyCount = 0;
@@ -755,5 +754,6 @@ window.toggleAdminPanel = function() {
   const panel = document.getElementById("adminPanel");
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 };
+
 
 
